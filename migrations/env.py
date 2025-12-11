@@ -11,7 +11,7 @@ from sqlmodel import SQLModel
 
 sys.path.insert(0, os.getcwd())
 
-from app import models
+import models
 
 load_dotenv()
 
