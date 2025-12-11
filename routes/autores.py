@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlmodel import Session, select
 from models.autor import Autor
+from models.livro import Livro
+from models.livro_autor_link import LivroAutorLink
 from database import get_session
 
 router = APIRouter(
@@ -48,3 +50,44 @@ def delete_autor(autor_id: int, session: Session = Depends(get_session)):
     session.delete(autor)
     session.commit()
     return {"detail": "Autor deletado com sucesso"}
+
+
+# Relacionamento com livros
+
+@router.post("/{autor_id}/livros/{livro_id}")
+def add_livro_to_autor(autor_id: int, livro_id: int, session: Session = Depends(get_session)):
+    autor = session.get(Autor, autor_id)
+    if not autor:
+        raise HTTPException(status_code=404, detail="Autor não encontrado")
+    
+    livro = session.get(Livro, livro_id)
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+    
+    existente = session.get(LivroAutorLink, (livro_id, autor_id))
+    if existente:
+        raise HTTPException(status_code=400, detail="Livro já está vinculado a este autor")
+    
+    link = LivroAutorLink(livro_id=livro_id, autor_id=autor_id)
+    session.add(link)
+    session.commit()
+    return {"detail": "Livro adicionado ao autor com sucesso"}
+
+@router.get("/{autor_id}/livros", response_model=list[Livro])
+def get_livros_by_autor(autor_id: int, session: Session = Depends(get_session)):
+    autor = session.get(Autor, autor_id)
+    if not autor:
+        raise HTTPException(status_code=404, detail="Autor não encontrado")
+    
+    statement = select(Livro).join(LivroAutorLink).where(LivroAutorLink.autor_id == autor_id)
+    livros = session.exec(statement).all()
+    return livros
+
+@router.delete("/{autor_id}/livros/{livro_id}")
+def remove_livro_from_autor(autor_id: int, livro_id: int, session: Session = Depends(get_session)):
+    link = session.get(LivroAutorLink, (livro_id, autor_id))
+    if not link:
+        raise HTTPException(status_code=404, detail="Vínculo entre livro e autor não encontrado")
+    session.delete(link)
+    session.commit()
+    return {"detail": "Livro removido do autor com sucesso"}
