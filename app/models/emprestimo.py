@@ -2,8 +2,8 @@ from sqlmodel import SQLModel, Field, Relationship
 from datetime import date
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from aluno import Aluno
-    from livro import Livro
+    from .aluno import Aluno
+    from .livro import Livro
 
 class EmprestimoBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
