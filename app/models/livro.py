@@ -1,0 +1,20 @@
+from sqlmodel import SQLModel, Field, Relationship
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from emprestimo import Emprestimo
+    from autor import Autor
+
+class LivroBase(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    titulo: str
+    ano: int
+    isbn: str = Field(unique=True)
+    categoria: str
+    quantidade: int
+
+class Livro(LivroBase, table=True):
+    emprestimos: list['Emprestimo'] = Relationship(back_populates='livro')
+    autores: list['Autor'] = Relationship(
+        back_populates='livros',
+        link_model='LivroAutorLink'
+    )
