@@ -21,3 +21,6 @@ class Emprestimo(EmprestimoBase, table=True):
 class EmprestimoInput(EmprestimoBase):
     aluno_id: int
     livro_id: int
+
+class EmprestimoWithLivro(EmprestimoBase):
+    livro: 'Livro'
