@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
+from datetime import date
 from models.emprestimo import Emprestimo, EmprestimoInput, EmprestimoFull
 from models.aluno import Aluno
 from models.livro import Livro
@@ -120,3 +121,43 @@ def delete_emprestimo(emprestimo_id: int, session: Session = Depends(get_session
     session.delete(emprestimo)
     session.commit()
     return {"detail": "Empréstimo deletado com sucesso"}
+
+
+# Consultas complexas
+
+@router.get("/atrasados/listar", response_model=list[EmprestimoFull])
+def get_emprestimos_atrasados(session: Session = Depends(get_session)):
+    """
+    Retorna todos os empréstimos atrasados (data_devolucao_prevista < hoje e ainda não devolvidos)
+    """
+    hoje = date.today()
+    statement = (
+        select(Emprestimo)
+        .where(
+            (Emprestimo.data_devolucao == None) &
+            (Emprestimo.data_devolucao_prevista < hoje)
+        )
+        .options(
+            selectinload(Emprestimo.aluno),
+            selectinload(Emprestimo.livro)
+        )
+    )
+    emprestimos = session.exec(statement).all()
+    return emprestimos
+
+
+@router.get("/ativos/listar", response_model=list[EmprestimoFull])
+def get_emprestimos_ativos(session: Session = Depends(get_session)):
+    """
+    Retorna todos os empréstimos ativos (ainda não devolvidos)
+    """
+    statement = (
+        select(Emprestimo)
+        .where(Emprestimo.data_devolucao == None)
+        .options(
+            selectinload(Emprestimo.aluno),
+            selectinload(Emprestimo.livro)
+        )
+    )
+    emprestimos = session.exec(statement).all()
+    return emprestimos
