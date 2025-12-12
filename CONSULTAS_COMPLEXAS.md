@@ -49,23 +49,25 @@ curl http://localhost:8000/emprestimos/ativos/listar
 
 ---
 
-### 3. **Busca de Livros**
+### 3. **Busca de Livros** ✅
 **Endpoint**: `GET /livros/buscar/query?q={termo}`
-**Descrição**: Busca livros por título, categoria ou nome do autor.
+**Descrição**: Busca livros por título, categoria ou nome do autor. Remove duplicatas automaticamente.
 
 **Parâmetros**:
-- `q` (obrigatório): Termo de busca
+- `q` (obrigatório): Termo de busca (case-insensitive)
 
 **Exemplos de Uso**:
 ```bash
 # Buscar por título
 curl "http://localhost:8000/livros/buscar/query?q=clean"
+# Retorna: "Clean Code" e "Clean Architecture"
 
 # Buscar por categoria
 curl "http://localhost:8000/livros/buscar/query?q=arquitetura"
 
 # Buscar por autor
 curl "http://localhost:8000/livros/buscar/query?q=martin"
+# Retorna: Todos os livros de Robert C. Martin e Martin Fowler
 ```
 
 **Exemplo de Resposta**:

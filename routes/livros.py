@@ -143,9 +143,9 @@ def buscar_livros(
     )
     livros_autor = session.exec(statement_autor).all()
 
-    # Combinar resultados e remover duplicatas
-    livros_set = set(livros_titulo_categoria + livros_autor)
-    return list(livros_set)
+    # Combinar resultados e remover duplicatas mantendo ordem
+    livros_dict = {livro.id: livro for livro in livros_titulo_categoria + livros_autor}
+    return list(livros_dict.values())
 
 
 @router.get("/mais-emprestados/ranking", response_model=list[LivroComEstatisticas])
