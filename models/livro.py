@@ -19,3 +19,8 @@ class Livro(LivroBase, table=True):
         back_populates='livros',
         link_model=LivroAutorLink
     )
+
+class LivroComEstatisticas(LivroBase):
+    """Livro com estatísticas de empréstimos"""
+    total_emprestimos: int
+    emprestimos_ativos: int

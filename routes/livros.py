@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func, or_
 from sqlalchemy.orm import selectinload
-from models.livro import Livro
+from models.livro import Livro, LivroComEstatisticas
 from models.livro_autor_link import LivroAutorLink
 from models.autor import Autor
 from models.emprestimo import Emprestimo, EmprestimoWithAluno
@@ -102,7 +102,7 @@ def get_emprestimos_of_livro(livro_id: int, session: Session = Depends(get_sessi
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
-    
+
     statement = (
         select(Emprestimo)
         .where(Emprestimo.livro_id == livro_id)
@@ -110,3 +110,97 @@ def get_emprestimos_of_livro(livro_id: int, session: Session = Depends(get_sessi
     )
     emprestimos = session.exec(statement).all()
     return emprestimos
+
+
+# Consultas complexas
+
+@router.get("/buscar/query", response_model=list[Livro])
+def buscar_livros(
+    q: str = Query(..., description="Termo de busca (título, categoria ou autor)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Busca livros por título, categoria ou nome do autor
+    """
+    # Busca por título ou categoria
+    statement = (
+        select(Livro)
+        .where(
+            or_(
+                Livro.titulo.ilike(f"%{q}%"),
+                Livro.categoria.ilike(f"%{q}%")
+            )
+        )
+    )
+    livros_titulo_categoria = session.exec(statement).all()
+
+    # Busca por autor
+    statement_autor = (
+        select(Livro)
+        .join(LivroAutorLink)
+        .join(Autor)
+        .where(Autor.nome.ilike(f"%{q}%"))
+    )
+    livros_autor = session.exec(statement_autor).all()
+
+    # Combinar resultados e remover duplicatas mantendo ordem
+    livros_dict = {livro.id: livro for livro in livros_titulo_categoria + livros_autor}
+    return list(livros_dict.values())
+
+
+@router.get("/mais-emprestados/ranking", response_model=list[LivroComEstatisticas])
+def get_livros_mais_emprestados(
+    limit: int = Query(default=10, le=50, description="Número de livros a retornar"),
+    session: Session = Depends(get_session)
+):
+    """
+    Retorna os livros mais emprestados com estatísticas
+    """
+    # Query para contar empréstimos por livro
+    statement = (
+        select(
+            Livro,
+            func.count(Emprestimo.id).label('total_emprestimos'),
+            func.count(
+                func.nullif(Emprestimo.data_devolucao, Emprestimo.data_devolucao)
+            ).label('emprestimos_ativos')
+        )
+        .outerjoin(Emprestimo, Livro.id == Emprestimo.livro_id)
+        .group_by(Livro.id)
+        .order_by(func.count(Emprestimo.id).desc())
+        .limit(limit)
+    )
+
+    results = session.exec(statement).all()
+
+    # Construir resposta com estatísticas
+    livros_com_stats = []
+    for livro, total, ativos in results:
+        # Contar empréstimos ativos manualmente (mais confiável)
+        ativos_count = session.exec(
+            select(func.count(Emprestimo.id))
+            .where(
+                (Emprestimo.livro_id == livro.id) &
+                (Emprestimo.data_devolucao == None)
+            )
+        ).first()
+
+        livro_dict = livro.model_dump()
+        livro_dict['total_emprestimos'] = total or 0
+        livro_dict['emprestimos_ativos'] = ativos_count or 0
+        livros_com_stats.append(LivroComEstatisticas(**livro_dict))
+
+    return livros_com_stats
+
+
+@router.get("/por-categoria/filtrar", response_model=list[Livro])
+def get_livros_por_categoria(
+    categoria: str = Query(..., description="Nome da categoria"),
+    session: Session = Depends(get_session)
+):
+    """
+    Filtra livros por categoria
+    """
+    statement = select(Livro).where(Livro.categoria.ilike(f"%{categoria}%"))
+    livros = session.exec(statement).all()
+    return livros
