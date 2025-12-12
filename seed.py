@@ -13,8 +13,12 @@ import sys
 import io
 from datetime import date, timedelta
 from sqlmodel import Session, select
-from app.database import engine
-from app.models import Aluno, Autor, Livro, Emprestimo, LivroAutorLink
+from database import engine
+from models.aluno import Aluno
+from models.autor import Autor
+from models.livro import Livro
+from models.emprestimo import Emprestimo
+from models.livro_autor_link import LivroAutorLink
 
 # Configurar encoding UTF-8 para Windows
 if sys.platform == 'win32':
@@ -104,21 +108,21 @@ def seed_livros(session: Session, autores: list[Autor]):
     print("📖 Criando livros...")
 
     livros_data = [
-        {"titulo": "Clean Code", "ano": 2008, "isbn": "978-0132350884", "categoria": "Engenharia de Software", "quantidade": 5},
-        {"titulo": "Refactoring", "ano": 1999, "isbn": "978-0201485677", "categoria": "Engenharia de Software", "quantidade": 3},
-        {"titulo": "Domain-Driven Design", "ano": 2003, "isbn": "978-0321125217", "categoria": "Arquitetura", "quantidade": 4},
-        {"titulo": "Design Patterns", "ano": 1994, "isbn": "978-0201633610", "categoria": "Padrões de Projeto", "quantidade": 6},
-        {"titulo": "The Pragmatic Programmer", "ano": 1999, "isbn": "978-0201616224", "categoria": "Desenvolvimento", "quantidade": 4},
-        {"titulo": "Test Driven Development", "ano": 2002, "isbn": "978-0321146533", "categoria": "Testes", "quantidade": 3},
-        {"titulo": "Effective Java", "ano": 2017, "isbn": "978-0134685991", "categoria": "Java", "quantidade": 5},
-        {"titulo": "The C Programming Language", "ano": 1978, "isbn": "978-0131103627", "categoria": "Linguagens", "quantidade": 7},
-        {"titulo": "The Art of Computer Programming Vol 1", "ano": 1968, "isbn": "978-0201896831", "categoria": "Algoritmos", "quantidade": 2},
-        {"titulo": "The C++ Programming Language", "ano": 2013, "isbn": "978-0321563842", "categoria": "Linguagens", "quantidade": 4},
-        {"titulo": "Clean Architecture", "ano": 2017, "isbn": "978-0134494166", "categoria": "Arquitetura", "quantidade": 5},
-        {"titulo": "Refactoring to Patterns", "ano": 2004, "isbn": "978-0321213358", "categoria": "Padrões de Projeto", "quantidade": 3},
-        {"titulo": "Working Effectively with Legacy Code", "ano": 2004, "isbn": "978-0131177055", "categoria": "Manutenção", "quantidade": 4},
-        {"titulo": "Introduction to Algorithms", "ano": 2009, "isbn": "978-0262033848", "categoria": "Algoritmos", "quantidade": 6},
-        {"titulo": "Structure and Interpretation of Computer Programs", "ano": 1996, "isbn": "978-0262510871", "categoria": "Fundamentos", "quantidade": 3},
+        {"titulo": "Clean Code", "ano": 2008, "isbn": "978-0132350884", "categoria": "Engenharia de Software"},
+        {"titulo": "Refactoring", "ano": 1999, "isbn": "978-0201485677", "categoria": "Engenharia de Software"},
+        {"titulo": "Domain-Driven Design", "ano": 2003, "isbn": "978-0321125217", "categoria": "Arquitetura"},
+        {"titulo": "Design Patterns", "ano": 1994, "isbn": "978-0201633610", "categoria": "Padrões de Projeto"},
+        {"titulo": "The Pragmatic Programmer", "ano": 1999, "isbn": "978-0201616224", "categoria": "Desenvolvimento"},
+        {"titulo": "Test Driven Development", "ano": 2002, "isbn": "978-0321146533", "categoria": "Testes"},
+        {"titulo": "Effective Java", "ano": 2017, "isbn": "978-0134685991", "categoria": "Java"},
+        {"titulo": "The C Programming Language", "ano": 1978, "isbn": "978-0131103627", "categoria": "Linguagens"},
+        {"titulo": "The Art of Computer Programming Vol 1", "ano": 1968, "isbn": "978-0201896831", "categoria": "Algoritmos"},
+        {"titulo": "The C++ Programming Language", "ano": 2013, "isbn": "978-0321563842", "categoria": "Linguagens"},
+        {"titulo": "Clean Architecture", "ano": 2017, "isbn": "978-0134494166", "categoria": "Arquitetura"},
+        {"titulo": "Refactoring to Patterns", "ano": 2004, "isbn": "978-0321213358", "categoria": "Padrões de Projeto"},
+        {"titulo": "Working Effectively with Legacy Code", "ano": 2004, "isbn": "978-0131177055", "categoria": "Manutenção"},
+        {"titulo": "Introduction to Algorithms", "ano": 2009, "isbn": "978-0262033848", "categoria": "Algoritmos"},
+        {"titulo": "Structure and Interpretation of Computer Programs", "ano": 1996, "isbn": "978-0262510871", "categoria": "Fundamentos"},
     ]
 
     livros = []

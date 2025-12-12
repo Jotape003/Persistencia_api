@@ -94,7 +94,7 @@ Os dados criados são úteis para testar:
    - Empréstimos ativos (sem devolução)
    - Empréstimos atrasados (prevista < hoje e não devolvido)
    - Histórico de empréstimos por aluno
-   - Disponibilidade de livros (quantidade > empréstimos ativos)
+   - Livros mais emprestados
 
 ## 🛠️ Estrutura do Código
 

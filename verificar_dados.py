@@ -5,8 +5,11 @@ Script para verificar os dados inseridos no banco de dados.
 import sys
 import io
 from sqlmodel import Session, select
-from app.database import engine
-from app.models import Aluno, Autor, Livro, Emprestimo
+from database import engine
+from models.aluno import Aluno
+from models.autor import Autor
+from models.livro import Livro
+from models.emprestimo import Emprestimo
 
 # Configurar encoding UTF-8 para Windows
 if sys.platform == 'win32':
@@ -40,7 +43,7 @@ def main():
         for livro in livros[:5]:
             autores_nomes = ", ".join([a.nome for a in livro.autores])
             print(f"  • '{livro.titulo}' ({livro.ano}) - por {autores_nomes}")
-            print(f"    ISBN: {livro.isbn} | Categoria: {livro.categoria} | Estoque: {livro.quantidade}")
+            print(f"    ISBN: {livro.isbn} | Categoria: {livro.categoria}")
         print(f"  ... e mais {len(livros) - 5} livros\n")
 
         # Empréstimos
