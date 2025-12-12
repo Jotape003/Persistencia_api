@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlmodel import Session, select
 from models.aluno import Aluno
+from models.emprestimo import Emprestimo
 from database import get_session
 
 router = APIRouter(
@@ -48,3 +49,15 @@ def delete_aluno(aluno_id: int, session: Session = Depends(get_session)):
     session.delete(aluno)
     session.commit()
     return {"detail": "Aluno deletado com sucesso"}
+
+
+# Relacionamento com emprestimos
+@router.get("/{aluno_id}/emprestimos", response_model=list[Emprestimo])
+def get_emprestimos_of_aluno(aluno_id: int, session: Session = Depends(get_session)):
+    aluno = session.get(Aluno, aluno_id)
+    if not aluno:
+        raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    
+    statement = select(Emprestimo).where(Emprestimo.aluno_id == aluno_id)
+    emprestimos = session.exec(statement).all()
+    return emprestimos
