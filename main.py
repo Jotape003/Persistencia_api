@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from routes import home, alunos, autores, livros, emprestimos
 
 from models.aluno import Aluno
-from models.emprestimo import Emprestimo, EmprestimoWithLivro, EmprestimoWithAluno
+from models.emprestimo import Emprestimo, EmprestimoWithLivro, EmprestimoWithAluno, EmprestimoFull
 from models.livro import Livro
 from models.autor import Autor
 
@@ -10,6 +10,7 @@ Aluno.model_rebuild()
 Emprestimo.model_rebuild()
 EmprestimoWithLivro.model_rebuild()
 EmprestimoWithAluno.model_rebuild()
+EmprestimoFull.model_rebuild()
 Livro.model_rebuild()
 Autor.model_rebuild()
 

@@ -27,3 +27,7 @@ class EmprestimoWithLivro(EmprestimoBase):
 
 class EmprestimoWithAluno(EmprestimoBase):
     aluno: 'Aluno'
+
+class EmprestimoFull(EmprestimoBase):
+    aluno: 'Aluno'
+    livro: 'Livro'

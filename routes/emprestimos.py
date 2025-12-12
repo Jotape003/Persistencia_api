@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlmodel import Session, select
-from models.emprestimo import Emprestimo, EmprestimoInput
+from sqlalchemy.orm import selectinload
+from models.emprestimo import Emprestimo, EmprestimoInput, EmprestimoFull
 from models.aluno import Aluno
 from models.livro import Livro
 from database import get_session
@@ -42,15 +43,32 @@ def create_emprestimo(emprestimo: EmprestimoInput, session: Session = Depends(ge
     session.refresh(novo_emprestimo)
     return novo_emprestimo
 
-@router.get("/", response_model=list[Emprestimo])
+@router.get("/", response_model=list[EmprestimoFull])
 def read_emprestimos(offset: int = 0, limit: int = Query(default=10, le=100),
                      session: Session = Depends(get_session)):
-    emprestimos = session.exec(select(Emprestimo).offset(offset).limit(limit)).all()
+    statement = (
+        select(Emprestimo)
+        .options(
+            selectinload(Emprestimo.aluno),
+            selectinload(Emprestimo.livro)
+        )
+        .offset(offset)
+        .limit(limit)
+    )
+    emprestimos = session.exec(statement).all()
     return emprestimos
 
-@router.get("/{emprestimo_id}", response_model=Emprestimo)
+@router.get("/{emprestimo_id}", response_model=EmprestimoFull)
 def read_emprestimo(emprestimo_id: int, session: Session = Depends(get_session)):
-    emprestimo = session.get(Emprestimo, emprestimo_id)
+    statement = (
+        select(Emprestimo)
+        .where(Emprestimo.id == emprestimo_id)
+        .options(
+            selectinload(Emprestimo.aluno),
+            selectinload(Emprestimo.livro)
+        )
+    )
+    emprestimo = session.exec(statement).first()
     if not emprestimo:
         raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
     return emprestimo
