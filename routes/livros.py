@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 from models.livro import Livro
 from models.livro_autor_link import LivroAutorLink
 from models.autor import Autor
-from models.emprestimo import Emprestimo
+from models.emprestimo import Emprestimo, EmprestimoWithAluno
 from database import get_session
 
 router = APIRouter(
@@ -96,12 +97,16 @@ def remove_autor_from_livro(livro_id: int, autor_id: int, session: Session = Dep
 
 # Relacionamento com emprestimos
 
-@router.get("/{livro_id}/emprestimos", response_model=list[Emprestimo])
+@router.get("/{livro_id}/emprestimos", response_model=list[EmprestimoWithAluno])
 def get_emprestimos_of_livro(livro_id: int, session: Session = Depends(get_session)):
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
     
-    statement = select(Emprestimo).where(Emprestimo.livro_id == livro_id)
+    statement = (
+        select(Emprestimo)
+        .where(Emprestimo.livro_id == livro_id)
+        .options(selectinload(Emprestimo.aluno))
+    )
     emprestimos = session.exec(statement).all()
     return emprestimos
