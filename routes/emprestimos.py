@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlmodel import Session, select
-from models.emprestimo import Emprestimo
+from models.emprestimo import Emprestimo, EmprestimoInput
+from models.aluno import Aluno
+from models.livro import Livro
 from database import get_session
 
 router = APIRouter(
@@ -9,11 +11,36 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=Emprestimo)
-def create_emprestimo(emprestimo: Emprestimo, session: Session = Depends(get_session)):
-    session.add(emprestimo)
+def create_emprestimo(emprestimo: EmprestimoInput, session: Session = Depends(get_session)):
+    aluno = session.get(Aluno, emprestimo.aluno_id)
+    if not aluno:
+        raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    
+    livro = session.get(Livro, emprestimo.livro_id)
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+    
+    emprestimo_existente = session.exec(
+        select(Emprestimo).where(
+            (Emprestimo.livro_id == emprestimo.livro_id) &
+            (Emprestimo.aluno_id == emprestimo.aluno_id) &
+            (Emprestimo.data_devolucao == None)
+        )
+    ).first()
+    if emprestimo_existente:
+        raise HTTPException(status_code=400, detail="Já existe um empréstimo ativo para este livro e aluno")
+
+    novo_emprestimo = Emprestimo(
+        aluno_id=emprestimo.aluno_id,
+        livro_id=emprestimo.livro_id,
+        data_emprestimo=emprestimo.data_emprestimo,
+        data_devolucao_prevista=emprestimo.data_devolucao_prevista,
+        data_devolucao=emprestimo.data_devolucao
+    )
+    session.add(novo_emprestimo)
     session.commit()
-    session.refresh(emprestimo)
-    return emprestimo
+    session.refresh(novo_emprestimo)
+    return novo_emprestimo
 
 @router.get("/", response_model=list[Emprestimo])
 def read_emprestimos(offset: int = 0, limit: int = Query(default=10, le=100),
@@ -29,12 +56,38 @@ def read_emprestimo(emprestimo_id: int, session: Session = Depends(get_session))
     return emprestimo
 
 @router.put("/{emprestimo_id}", response_model=Emprestimo)
-def update_emprestimo(emprestimo_id: int, emprestimo: Emprestimo,
+def update_emprestimo(emprestimo_id: int, emprestimo: EmprestimoInput,
                       session: Session = Depends(get_session)):
     db_emprestimo = session.get(Emprestimo, emprestimo_id)
     if not db_emprestimo:
         raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
-    for key, value in emprestimo.model_dump(exclude_unset=True).items():
+    
+    data = emprestimo.model_dump(exclude_unset=True)
+    if 'aluno_id' in data:
+        aluno = session.get(Aluno, data['aluno_id'])
+        if not aluno:
+            raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    if 'livro_id' in data:
+        livro = session.get(Livro, data['livro_id'])
+        if not livro:
+            raise HTTPException(status_code=404, detail="Livro não encontrado")
+    
+    aluno_id_check = data.get('aluno_id', db_emprestimo.aluno_id)
+    livro_id_check = data.get('livro_id', db_emprestimo.livro_id)
+    
+    emprestimo_ativo = session.exec(
+        select(Emprestimo)
+        .where(
+            (Emprestimo.aluno_id == aluno_id_check) &
+            (Emprestimo.livro_id == livro_id_check) &
+            (Emprestimo.data_devolucao == None) &
+            (Emprestimo.id != emprestimo_id)
+        )
+    ).first()
+    if emprestimo_ativo:
+        raise HTTPException(status_code=400, detail="Já existe um empréstimo ativo para este livro e aluno")
+    
+    for key, value in data.items():
         setattr(db_emprestimo, key, value)
     session.add(db_emprestimo)
     session.commit()

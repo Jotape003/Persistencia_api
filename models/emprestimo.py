@@ -17,3 +17,7 @@ class Emprestimo(EmprestimoBase, table=True):
 
     aluno: 'Aluno' = Relationship(back_populates='emprestimos')
     livro: 'Livro' = Relationship(back_populates='emprestimos')
+
+class EmprestimoInput(EmprestimoBase):
+    aluno_id: int
+    livro_id: int
