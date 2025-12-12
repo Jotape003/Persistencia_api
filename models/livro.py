@@ -12,7 +12,6 @@ class LivroBase(SQLModel):
     ano: int
     isbn: str = Field(unique=True)
     categoria: str
-    quantidade: int
 
 class Livro(LivroBase, table=True):
     emprestimos: list['Emprestimo'] = Relationship(back_populates='livro')
