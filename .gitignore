@@ -5,9 +5,7 @@ __pycache__/
 .venv/
 venv/
 env/
-.env_bak/
 
-.env
 .env.*
 !.env.example
 
@@ -28,4 +26,3 @@ htmlcov/
 dist/
 build/
 *.egg-info/
-/.claude
