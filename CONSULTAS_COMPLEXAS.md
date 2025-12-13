@@ -1,10 +1,10 @@
 # Consultas Complexas Implementadas
 
-## 📊 Resumo
+## Resumo
 
 Este documento descreve as consultas complexas implementadas na API de biblioteca.
 
-## 🔍 Endpoints Implementados
+## Endpoints Implementados
 
 ### 1. **Empréstimos Atrasados**
 **Endpoint**: `GET /emprestimos/atrasados/listar`
@@ -49,7 +49,7 @@ curl http://localhost:8000/emprestimos/ativos/listar
 
 ---
 
-### 3. **Busca de Livros** ✅
+### 3. **Busca de Livros**
 **Endpoint**: `GET /livros/buscar/query?q={termo}`
 **Descrição**: Busca livros por título, categoria ou nome do autor. Remove duplicatas automaticamente.
 
@@ -170,7 +170,7 @@ curl http://localhost:8000/estatisticas/
 
 ---
 
-## 🧪 Como Testar
+## Como Testar
 
 ### 1. **Via Swagger UI** (Recomendado)
 Acesse: `http://localhost:8000/docs`
@@ -217,7 +217,7 @@ print(response.json())
 
 ---
 
-## 📁 Arquivos Modificados/Criados
+## Arquivos Modificados/Criados
 
 ### Novos Arquivos:
 - `routes/estatisticas.py` - Endpoint de estatísticas gerais
@@ -230,7 +230,7 @@ print(response.json())
 
 ---
 
-## 🎯 Casos de Uso
+## Casos de Uso
 
 ### Dashboard Administrativo
 Use o endpoint `/estatisticas/` para exibir um painel de controle.
@@ -246,7 +246,7 @@ Use `/livros/mais-emprestados/ranking` para gerar relatórios de popularidade.
 
 ---
 
-## 🚀 Próximas Melhorias (Opcional)
+## Próximas Melhorias (Opcional)
 
 - [ ] Filtrar empréstimos por período de datas
 - [ ] Top alunos mais ativos (já tem no /estatisticas, mas pode ter endpoint separado)
