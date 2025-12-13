@@ -74,12 +74,23 @@ def add_livro_to_autor(autor_id: int, livro_id: int, session: Session = Depends(
     return {"detail": "Livro adicionado ao autor com sucesso"}
 
 @router.get("/{autor_id}/livros", response_model=list[Livro])
-def get_livros_by_autor(autor_id: int, session: Session = Depends(get_session)):
+def get_livros_by_autor(
+    autor_id: int,
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
+    session: Session = Depends(get_session)
+):
     autor = session.get(Autor, autor_id)
     if not autor:
         raise HTTPException(status_code=404, detail="Autor não encontrado")
-    
-    statement = select(Livro).join(LivroAutorLink).where(LivroAutorLink.autor_id == autor_id)
+
+    statement = (
+        select(Livro)
+        .join(LivroAutorLink)
+        .where(LivroAutorLink.autor_id == autor_id)
+        .offset(offset)
+        .limit(limit)
+    )
     livros = session.exec(statement).all()
     return livros
 

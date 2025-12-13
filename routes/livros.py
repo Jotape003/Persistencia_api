@@ -76,12 +76,23 @@ def add_autor_to_livro(livro_id: int, autor_id: int, session: Session = Depends(
     return {"detail": "Autor adicionado ao livro com sucesso"}
 
 @router.get("/{livro_id}/autores", response_model=list[Autor])
-def get_autores_of_livro(livro_id: int, session: Session = Depends(get_session)):
+def get_autores_of_livro(
+    livro_id: int,
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
+    session: Session = Depends(get_session)
+):
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
-    
-    statement = select(Autor).join(LivroAutorLink).where(LivroAutorLink.livro_id == livro_id)
+
+    statement = (
+        select(Autor)
+        .join(LivroAutorLink)
+        .where(LivroAutorLink.livro_id == livro_id)
+        .offset(offset)
+        .limit(limit)
+    )
     autores = session.exec(statement).all()
     return autores
 
@@ -98,7 +109,12 @@ def remove_autor_from_livro(livro_id: int, autor_id: int, session: Session = Dep
 # Relacionamento com emprestimos
 
 @router.get("/{livro_id}/emprestimos", response_model=list[EmprestimoWithAluno])
-def get_emprestimos_of_livro(livro_id: int, session: Session = Depends(get_session)):
+def get_emprestimos_of_livro(
+    livro_id: int,
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
+    session: Session = Depends(get_session)
+):  
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -106,6 +122,8 @@ def get_emprestimos_of_livro(livro_id: int, session: Session = Depends(get_sessi
     statement = (
         select(Emprestimo)
         .where(Emprestimo.livro_id == livro_id)
+        .offset(offset)
+        .limit(limit)
         .options(selectinload(Emprestimo.aluno))
     )
     emprestimos = session.exec(statement).all()
@@ -117,11 +135,11 @@ def get_emprestimos_of_livro(livro_id: int, session: Session = Depends(get_sessi
 @router.get("/buscar/query", response_model=list[Livro])
 def buscar_livros(
     q: str = Query(..., description="Termo de busca (título, categoria ou autor)"),
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
-    """
-    Busca livros por título, categoria ou nome do autor
-    """
+    """Busca livros por título, categoria ou nome do autor"""
     # Busca por título ou categoria
     statement = (
         select(Livro)
@@ -144,8 +162,12 @@ def buscar_livros(
     livros_autor = session.exec(statement_autor).all()
 
     # Combinar resultados e remover duplicatas mantendo ordem
-    livros_dict = {livro.id: livro for livro in livros_titulo_categoria + livros_autor}
-    return list(livros_dict.values())
+    livros_dict = {
+        livro.id: livro
+        for livro in livros_titulo_categoria + livros_autor
+    }
+    livros = list(livros_dict.values())
+    return livros[offset : offset + limit]
 
 
 @router.get("/mais-emprestados/ranking", response_model=list[LivroComEstatisticas])
@@ -196,11 +218,16 @@ def get_livros_mais_emprestados(
 @router.get("/por-categoria/filtrar", response_model=list[Livro])
 def get_livros_por_categoria(
     categoria: str = Query(..., description="Nome da categoria"),
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
-    """
-    Filtra livros por categoria
-    """
-    statement = select(Livro).where(Livro.categoria.ilike(f"%{categoria}%"))
+    """Filtra livros por categoria"""
+    statement = (
+        select(Livro)
+        .where(Livro.categoria.ilike(f"%{categoria}%"))
+        .offset(offset)
+        .limit(limit)
+    )
     livros = session.exec(statement).all()
     return livros

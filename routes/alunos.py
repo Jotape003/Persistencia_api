@@ -53,8 +53,14 @@ def delete_aluno(aluno_id: int, session: Session = Depends(get_session)):
 
 
 # Relacionamento com emprestimos
+
 @router.get("/{aluno_id}/emprestimos", response_model=list[EmprestimoWithLivro])
-def get_emprestimos_of_aluno(aluno_id: int, session: Session = Depends(get_session)):
+def get_emprestimos_of_aluno(
+    aluno_id: int,
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
+    session: Session = Depends(get_session)
+):  
     aluno = session.get(Aluno, aluno_id)
     if not aluno:
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
@@ -62,6 +68,8 @@ def get_emprestimos_of_aluno(aluno_id: int, session: Session = Depends(get_sessi
     statement = (
         select(Emprestimo)
         .where(Emprestimo.aluno_id == aluno_id)
+        .offset(offset)
+        .limit(limit)
         .options(selectinload(Emprestimo.livro))
     )
     emprestimos = session.exec(statement).all()

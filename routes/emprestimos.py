@@ -126,10 +126,12 @@ def delete_emprestimo(emprestimo_id: int, session: Session = Depends(get_session
 # Consultas complexas
 
 @router.get("/atrasados/listar", response_model=list[EmprestimoFull])
-def get_emprestimos_atrasados(session: Session = Depends(get_session)):
-    """
-    Retorna todos os empréstimos atrasados (data_devolucao_prevista < hoje e ainda não devolvidos)
-    """
+def get_emprestimos_atrasados(
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
+    session: Session = Depends(get_session)
+):
+    """Retorna todos os empréstimos atrasados (data_devolucao_prevista < hoje e ainda não devolvidos)."""
     hoje = date.today()
     statement = (
         select(Emprestimo)
@@ -137,6 +139,8 @@ def get_emprestimos_atrasados(session: Session = Depends(get_session)):
             (Emprestimo.data_devolucao == None) &
             (Emprestimo.data_devolucao_prevista < hoje)
         )
+        .offset(offset)
+        .limit(limit)
         .options(
             selectinload(Emprestimo.aluno),
             selectinload(Emprestimo.livro)
@@ -147,13 +151,17 @@ def get_emprestimos_atrasados(session: Session = Depends(get_session)):
 
 
 @router.get("/ativos/listar", response_model=list[EmprestimoFull])
-def get_emprestimos_ativos(session: Session = Depends(get_session)):
-    """
-    Retorna todos os empréstimos ativos (ainda não devolvidos)
-    """
+def get_emprestimos_ativos(
+    offset: int = 0,
+    limit: int = Query(default=10, le=100),
+    session: Session = Depends(get_session)
+):
+    """Retorna todos os empréstimos ativos (ainda não devolvidos)"""
     statement = (
         select(Emprestimo)
         .where(Emprestimo.data_devolucao == None)
+        .offset(offset)
+        .limit(limit)
         .options(
             selectinload(Emprestimo.aluno),
             selectinload(Emprestimo.livro)
