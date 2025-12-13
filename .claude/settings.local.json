@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv sync:*)",
+      "Bash(where:*)",
+      "Bash(python -m uv:*)",
+      "Bash(pip install:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
+    ]
+  }
+}

@@ -18,5 +18,6 @@ engine = create_engine(
 )
 
 def get_session():
+    """Dependency para obter sessão do banco de dados"""
     with Session(engine) as session:
         yield session

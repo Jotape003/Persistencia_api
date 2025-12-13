@@ -13,6 +13,7 @@ class AutorBase(SQLModel):
     ano_nascimento: int
 
 class Autor(AutorBase, table=True):
+    """Modelo de autor de livros"""
     livros: list['Livro'] = Relationship(
         back_populates='autores',
         link_model=LivroAutorLink

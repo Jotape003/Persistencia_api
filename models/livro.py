@@ -14,6 +14,7 @@ class LivroBase(SQLModel):
     categoria: str
 
 class Livro(LivroBase, table=True):
+    """Modelo de livro da biblioteca"""
     emprestimos: list['Emprestimo'] = Relationship(back_populates='livro')
     autores: list['Autor'] = Relationship(
         back_populates='livros',

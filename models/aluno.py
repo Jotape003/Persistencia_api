@@ -11,4 +11,5 @@ class AlunoBase(SQLModel):
     email: str = Field(unique=True)
 
 class Aluno(AlunoBase, table=True):
+    """Modelo de aluno da biblioteca"""
     emprestimos: list['Emprestimo'] = Relationship(back_populates='aluno')

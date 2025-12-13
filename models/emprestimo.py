@@ -12,6 +12,7 @@ class EmprestimoBase(SQLModel):
     data_devolucao: date | None = Field(default=None)
 
 class Emprestimo(EmprestimoBase, table=True):
+    """Modelo de empréstimo de livro"""
     aluno_id: int = Field(foreign_key='aluno.id')
     livro_id: int = Field(foreign_key='livro.id')
 
