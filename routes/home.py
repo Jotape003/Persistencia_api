@@ -7,4 +7,5 @@ router = APIRouter(
 
 @router.get("/")
 async def root():
+    """Endpoint raiz da API"""
     return {"message": "Bem vindo ao sistema de biblioteca!"}
