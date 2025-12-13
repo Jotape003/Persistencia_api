@@ -30,7 +30,7 @@ class EstatisticasGerais(BaseModel):
 @router.get("/", response_model=EstatisticasGerais)
 def get_estatisticas_gerais(session: Session = Depends(get_session)):
     """
-    Retorna estatísticas gerais do sistema de biblioteca
+    Retorna estatísticas gerais do sistema de biblioteca.
     """
     # Contadores básicos
     total_alunos = len(session.exec(select(Aluno)).all())

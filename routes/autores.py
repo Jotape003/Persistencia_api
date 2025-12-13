@@ -12,6 +12,7 @@ router = APIRouter(
 
 @router.post("/", response_model=Autor)
 def create_autor(autor: Autor, session: Session = Depends(get_session)):
+    """Cria um novo autor."""
     session.add(autor)
     session.commit()
     session.refresh(autor)
@@ -20,11 +21,13 @@ def create_autor(autor: Autor, session: Session = Depends(get_session)):
 @router.get("/", response_model=list[Autor])
 def read_autores(offset: int = 0, limit: int = Query(default=10, le=100),
                  session: Session = Depends(get_session)):
+    """Retorna uma lista de autores com paginação."""
     autores = session.exec(select(Autor).offset(offset).limit(limit)).all()
     return autores
 
 @router.get("/{autor_id}", response_model=Autor)
 def read_autor(autor_id: int, session: Session = Depends(get_session)):
+    """Retorna um autor pelo ID."""
     autor = session.get(Autor, autor_id)
     if not autor:
         raise HTTPException(status_code=404, detail="Autor não encontrado")
@@ -32,6 +35,7 @@ def read_autor(autor_id: int, session: Session = Depends(get_session)):
 
 @router.put("/{autor_id}", response_model=Autor)
 def update_autor(autor_id: int, autor: Autor, session: Session = Depends(get_session)):
+    """Atualiza os dados de um autor pelo ID."""
     db_autor = session.get(Autor, autor_id)
     if not db_autor:
         raise HTTPException(status_code=404, detail="Autor não encontrado")
@@ -44,6 +48,7 @@ def update_autor(autor_id: int, autor: Autor, session: Session = Depends(get_ses
 
 @router.delete("/{autor_id}")
 def delete_autor(autor_id: int, session: Session = Depends(get_session)):
+    """Deleta um autor pelo ID."""
     autor = session.get(Autor, autor_id)
     if not autor:
         raise HTTPException(status_code=404, detail="Autor não encontrado")
@@ -56,6 +61,7 @@ def delete_autor(autor_id: int, session: Session = Depends(get_session)):
 
 @router.post("/{autor_id}/livros/{livro_id}")
 def add_livro_to_autor(autor_id: int, livro_id: int, session: Session = Depends(get_session)):
+    """Vincula um livro a um autor."""
     autor = session.get(Autor, autor_id)
     if not autor:
         raise HTTPException(status_code=404, detail="Autor não encontrado")
@@ -80,6 +86,7 @@ def get_livros_by_autor(
     limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
+    """Retorna os livros associados a um autor específico."""
     autor = session.get(Autor, autor_id)
     if not autor:
         raise HTTPException(status_code=404, detail="Autor não encontrado")
@@ -96,6 +103,7 @@ def get_livros_by_autor(
 
 @router.delete("/{autor_id}/livros/{livro_id}")
 def remove_livro_from_autor(autor_id: int, livro_id: int, session: Session = Depends(get_session)):
+    """Remove o vínculo entre um livro e um autor."""
     link = session.get(LivroAutorLink, (livro_id, autor_id))
     if not link:
         raise HTTPException(status_code=404, detail="Vínculo entre livro e autor não encontrado")

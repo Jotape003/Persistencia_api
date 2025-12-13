@@ -14,6 +14,7 @@ router = APIRouter(
 
 @router.post("/", response_model=Emprestimo)
 def create_emprestimo(emprestimo: EmprestimoInput, session: Session = Depends(get_session)):
+    """Cria um novo empréstimo."""
     aluno = session.get(Aluno, emprestimo.aluno_id)
     if not aluno:
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
@@ -47,6 +48,7 @@ def create_emprestimo(emprestimo: EmprestimoInput, session: Session = Depends(ge
 @router.get("/", response_model=list[EmprestimoFull])
 def read_emprestimos(offset: int = 0, limit: int = Query(default=10, le=100),
                      session: Session = Depends(get_session)):
+    """Retorna uma lista de todos os empréstimos."""
     statement = (
         select(Emprestimo)
         .options(
@@ -61,6 +63,7 @@ def read_emprestimos(offset: int = 0, limit: int = Query(default=10, le=100),
 
 @router.get("/{emprestimo_id}", response_model=EmprestimoFull)
 def read_emprestimo(emprestimo_id: int, session: Session = Depends(get_session)):
+    """Retorna um empréstimo pelo ID."""
     statement = (
         select(Emprestimo)
         .where(Emprestimo.id == emprestimo_id)
@@ -77,6 +80,7 @@ def read_emprestimo(emprestimo_id: int, session: Session = Depends(get_session))
 @router.put("/{emprestimo_id}", response_model=Emprestimo)
 def update_emprestimo(emprestimo_id: int, emprestimo: EmprestimoInput,
                       session: Session = Depends(get_session)):
+    """Atualiza os dados de um empréstimo pelo ID."""
     db_emprestimo = session.get(Emprestimo, emprestimo_id)
     if not db_emprestimo:
         raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
@@ -115,6 +119,7 @@ def update_emprestimo(emprestimo_id: int, emprestimo: EmprestimoInput,
 
 @router.delete("/{emprestimo_id}")
 def delete_emprestimo(emprestimo_id: int, session: Session = Depends(get_session)):
+    """Deleta um empréstimo pelo ID."""
     emprestimo = session.get(Emprestimo, emprestimo_id)
     if not emprestimo:
         raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
@@ -156,7 +161,7 @@ def get_emprestimos_ativos(
     limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
-    """Retorna todos os empréstimos ativos (ainda não devolvidos)"""
+    """Retorna todos os empréstimos ativos (ainda não devolvidos)."""
     statement = (
         select(Emprestimo)
         .where(Emprestimo.data_devolucao == None)

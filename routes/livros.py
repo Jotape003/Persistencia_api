@@ -14,6 +14,7 @@ router = APIRouter(
 
 @router.post("/", response_model=Livro)
 def create_livro(livro: Livro, session: Session = Depends(get_session)):
+    """Cria um novo livro."""
     session.add(livro)
     session.commit()
     session.refresh(livro)
@@ -22,11 +23,13 @@ def create_livro(livro: Livro, session: Session = Depends(get_session)):
 @router.get("/", response_model=list[Livro])
 def read_livros(offset: int = 0, limit: int = Query(default=10, le=100),
                 session: Session = Depends(get_session)):
+    """Retorna uma lista de livros com paginação."""
     livros = session.exec(select(Livro).offset(offset).limit(limit)).all()
     return livros
 
 @router.get("/{livro_id}", response_model=Livro)
 def read_livro(livro_id: int, session: Session = Depends(get_session)):
+    """Retorna um livro pelo ID."""
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -34,6 +37,7 @@ def read_livro(livro_id: int, session: Session = Depends(get_session)):
 
 @router.put("/{livro_id}", response_model=Livro)
 def update_livro(livro_id: int, livro: Livro, session: Session = Depends(get_session)):
+    """Atualiza os dados de um livro pelo ID."""
     db_livro = session.get(Livro, livro_id)
     if not db_livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -46,6 +50,7 @@ def update_livro(livro_id: int, livro: Livro, session: Session = Depends(get_ses
 
 @router.delete("/{livro_id}")
 def delete_livro(livro_id: int, session: Session = Depends(get_session)):
+    """Deleta um livro pelo ID."""
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -58,6 +63,7 @@ def delete_livro(livro_id: int, session: Session = Depends(get_session)):
 
 @router.post("/{livro_id}/autores/{autor_id}")
 def add_autor_to_livro(livro_id: int, autor_id: int, session: Session = Depends(get_session)):
+    """Vincula um autor a um livro."""
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -82,6 +88,7 @@ def get_autores_of_livro(
     limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
+    """Retorna os autores associados a um livro."""
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -98,6 +105,7 @@ def get_autores_of_livro(
 
 @router.delete("/{livro_id}/autores/{autor_id}")
 def remove_autor_from_livro(livro_id: int, autor_id: int, session: Session = Depends(get_session)):
+    """Remove o vínculo de um autor com um livro."""
     link = session.get(LivroAutorLink, (livro_id, autor_id))
     if not link:
         raise HTTPException(status_code=404, detail="Vínculo entre livro e autor não encontrado")
@@ -115,6 +123,7 @@ def get_emprestimos_of_livro(
     limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):  
+    """Retorna os empréstimos de um livro."""
     livro = session.get(Livro, livro_id)
     if not livro:
         raise HTTPException(status_code=404, detail="Livro não encontrado")
@@ -139,7 +148,7 @@ def buscar_livros(
     limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
-    """Busca livros por título, categoria ou nome do autor"""
+    """Busca livros por título, categoria ou nome do autor."""
     # Busca por título ou categoria
     statement = (
         select(Livro)
@@ -176,7 +185,7 @@ def get_livros_mais_emprestados(
     session: Session = Depends(get_session)
 ):
     """
-    Retorna os livros mais emprestados com estatísticas
+    Retorna os livros mais emprestados com estatísticas.
     """
     # Query para contar empréstimos por livro
     statement = (
@@ -222,7 +231,7 @@ def get_livros_por_categoria(
     limit: int = Query(default=10, le=100),
     session: Session = Depends(get_session)
 ):
-    """Filtra livros por categoria"""
+    """Filtra livros por categoria."""
     statement = (
         select(Livro)
         .where(Livro.categoria.ilike(f"%{categoria}%"))
