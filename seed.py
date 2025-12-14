@@ -171,39 +171,32 @@ def vincular_livros_autores(session: Session, livros: list[Livro], autores: list
 
 
 def seed_emprestimos(session: Session, alunos: list[Aluno], livros: list[Livro]):
-    """Cria 20 empréstimos (alguns ativos, alguns devolvidos)"""
+    """Cria 20 empréstimos (ativos no prazo, finalizados e atualmente atrasados)"""
     print("📋 Criando empréstimos...")
 
     hoje = date.today()
 
     emprestimos_data = [
-        # Empréstimos ativos (sem data de devolução)
         {"aluno_id": alunos[0].id, "livro_id": livros[0].id, "data_emprestimo": hoje - timedelta(days=5), "data_devolucao_prevista": hoje + timedelta(days=9), "data_devolucao": None},
         {"aluno_id": alunos[1].id, "livro_id": livros[1].id, "data_emprestimo": hoje - timedelta(days=3), "data_devolucao_prevista": hoje + timedelta(days=11), "data_devolucao": None},
-        {"aluno_id": alunos[2].id, "livro_id": livros[2].id, "data_emprestimo": hoje - timedelta(days=7), "data_devolucao_prevista": hoje + timedelta(days=7), "data_devolucao": None},
+        {"aluno_id": alunos[2].id, "livro_id": livros[2].id, "data_emprestimo": hoje - timedelta(days=1), "data_devolucao_prevista": hoje + timedelta(days=13), "data_devolucao": None},
         {"aluno_id": alunos[3].id, "livro_id": livros[3].id, "data_emprestimo": hoje - timedelta(days=2), "data_devolucao_prevista": hoje + timedelta(days=12), "data_devolucao": None},
-        {"aluno_id": alunos[4].id, "livro_id": livros[4].id, "data_emprestimo": hoje - timedelta(days=10), "data_devolucao_prevista": hoje + timedelta(days=4), "data_devolucao": None},
-        {"aluno_id": alunos[5].id, "livro_id": livros[5].id, "data_emprestimo": hoje - timedelta(days=1), "data_devolucao_prevista": hoje + timedelta(days=13), "data_devolucao": None},
-        {"aluno_id": alunos[6].id, "livro_id": livros[6].id, "data_emprestimo": hoje - timedelta(days=4), "data_devolucao_prevista": hoje + timedelta(days=10), "data_devolucao": None},
+        
+        {"aluno_id": alunos[4].id, "livro_id": livros[4].id, "data_emprestimo": hoje - timedelta(days=20), "data_devolucao_prevista": hoje - timedelta(days=5), "data_devolucao": None},
+        {"aluno_id": alunos[5].id, "livro_id": livros[5].id, "data_emprestimo": hoje - timedelta(days=25), "data_devolucao_prevista": hoje - timedelta(days=10), "data_devolucao": None},
+        {"aluno_id": alunos[6].id, "livro_id": livros[6].id, "data_emprestimo": hoje - timedelta(days=45), "data_devolucao_prevista": hoje - timedelta(days=30), "data_devolucao": None},
 
-        # Empréstimos já devolvidos
         {"aluno_id": alunos[7].id, "livro_id": livros[7].id, "data_emprestimo": hoje - timedelta(days=30), "data_devolucao_prevista": hoje - timedelta(days=16), "data_devolucao": hoje - timedelta(days=18)},
         {"aluno_id": alunos[8].id, "livro_id": livros[8].id, "data_emprestimo": hoje - timedelta(days=25), "data_devolucao_prevista": hoje - timedelta(days=11), "data_devolucao": hoje - timedelta(days=12)},
         {"aluno_id": alunos[9].id, "livro_id": livros[9].id, "data_emprestimo": hoje - timedelta(days=40), "data_devolucao_prevista": hoje - timedelta(days=26), "data_devolucao": hoje - timedelta(days=24)},
-        {"aluno_id": alunos[10].id, "livro_id": livros[10].id, "data_emprestimo": hoje - timedelta(days=35), "data_devolucao_prevista": hoje - timedelta(days=21), "data_devolucao": hoje - timedelta(days=20)},
-        {"aluno_id": alunos[11].id, "livro_id": livros[11].id, "data_emprestimo": hoje - timedelta(days=20), "data_devolucao_prevista": hoje - timedelta(days=6), "data_devolucao": hoje - timedelta(days=5)},
+        
+        {"aluno_id": alunos[10].id, "livro_id": livros[10].id, "data_emprestimo": hoje - timedelta(days=50), "data_devolucao_prevista": hoje - timedelta(days=36), "data_devolucao": hoje - timedelta(days=30)},
+        {"aluno_id": alunos[11].id, "livro_id": livros[11].id, "data_emprestimo": hoje - timedelta(days=45), "data_devolucao_prevista": hoje - timedelta(days=31), "data_devolucao": hoje - timedelta(days=25)},
 
-        # Empréstimos atrasados (devolvido depois da data prevista)
-        {"aluno_id": alunos[12].id, "livro_id": livros[12].id, "data_emprestimo": hoje - timedelta(days=50), "data_devolucao_prevista": hoje - timedelta(days=36), "data_devolucao": hoje - timedelta(days=30)},
-        {"aluno_id": alunos[13].id, "livro_id": livros[13].id, "data_emprestimo": hoje - timedelta(days=45), "data_devolucao_prevista": hoje - timedelta(days=31), "data_devolucao": hoje - timedelta(days=25)},
-
-        # Mais empréstimos ativos
-        {"aluno_id": alunos[14].id, "livro_id": livros[14].id, "data_emprestimo": hoje - timedelta(days=6), "data_devolucao_prevista": hoje + timedelta(days=8), "data_devolucao": None},
-        {"aluno_id": alunos[0].id, "livro_id": livros[11].id, "data_emprestimo": hoje - timedelta(days=8), "data_devolucao_prevista": hoje + timedelta(days=6), "data_devolucao": None},
-        {"aluno_id": alunos[1].id, "livro_id": livros[12].id, "data_emprestimo": hoje - timedelta(days=12), "data_devolucao_prevista": hoje + timedelta(days=2), "data_devolucao": None},
-        {"aluno_id": alunos[2].id, "livro_id": livros[13].id, "data_emprestimo": hoje - timedelta(days=9), "data_devolucao_prevista": hoje + timedelta(days=5), "data_devolucao": None},
-        {"aluno_id": alunos[3].id, "livro_id": livros[14].id, "data_emprestimo": hoje - timedelta(days=11), "data_devolucao_prevista": hoje + timedelta(days=3), "data_devolucao": None},
-        {"aluno_id": alunos[4].id, "livro_id": livros[0].id, "data_emprestimo": hoje - timedelta(days=13), "data_devolucao_prevista": hoje + timedelta(days=1), "data_devolucao": None},
+        {"aluno_id": alunos[12].id, "livro_id": livros[12].id, "data_emprestimo": hoje - timedelta(days=6), "data_devolucao_prevista": hoje + timedelta(days=8), "data_devolucao": None},
+        {"aluno_id": alunos[13].id, "livro_id": livros[13].id, "data_emprestimo": hoje - timedelta(days=8), "data_devolucao_prevista": hoje + timedelta(days=6), "data_devolucao": None},
+        {"aluno_id": alunos[14].id, "livro_id": livros[14].id, "data_emprestimo": hoje - timedelta(days=12), "data_devolucao_prevista": hoje + timedelta(days=2), "data_devolucao": None},
+        {"aluno_id": alunos[0].id, "livro_id": livros[11].id, "data_emprestimo": hoje - timedelta(days=9), "data_devolucao_prevista": hoje + timedelta(days=5), "data_devolucao": None},
     ]
 
     emprestimos = []
@@ -213,9 +206,9 @@ def seed_emprestimos(session: Session, alunos: list[Aluno], livros: list[Livro])
         emprestimos.append(emprestimo)
 
     session.commit()
-    print(f"✅ {len(emprestimos)} empréstimos criados!\n")
+    print(f"✅ {len(emprestimos)} empréstimos criados!")
+    print(f"   - Sendo 3 atualmente atrasados (Alunos ID: {alunos[4].id}, {alunos[5].id}, {alunos[6].id})")
     return emprestimos
-
 
 def exibir_estatisticas(session: Session):
     """Exibe estatísticas do banco populado"""
